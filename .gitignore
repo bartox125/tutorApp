@@ -22,9 +22,10 @@ env/
 ENV/
 
 # =============================================================================
-# Aplikacja – dane użytkownika (nie commitujemy bazy danych korepetytora)
+# Application data (user databases)
 # =============================================================================
 dane_korepetycje.json
+homework_data.json
 
 # =============================================================================
 # IDE i edytory

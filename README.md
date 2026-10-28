@@ -15,7 +15,7 @@ Built with **Python** and **CustomTkinter**, with persistent JSON storage — no
 | Feature | Details |
 |---|---|
 | **Add / remove students** | Manage your student roster from the sidebar |
-| **Add assignments** | Set a title, optional notes, and an assigned date |
+| **Add assignments** | Set a title, optional notes, and an assigned date (HTML-style calendar picker) |
 | **Delete assignments** | Remove a task with a confirmation prompt |
 | **Toggle status** | Mark assignments as *Done* or revert to *Pending* |
 | **Student history** | Full assignment log per student with dates and statuses |
@@ -61,6 +61,7 @@ homework-tracker/
 ├── main.py              # Entry point — run this file
 ├── data_manager.py      # Business logic & JSON persistence (no UI code)
 ├── app.py               # CustomTkinter GUI (no business logic)
+├── date_picker.py       # CustomTkinter date input & calendar popup widget
 ├── homework_data.json   # Auto-generated database (git-ignored)
 ├── .gitignore
 └── README.md
