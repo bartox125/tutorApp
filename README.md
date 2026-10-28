@@ -152,9 +152,3 @@ Data is stored in plain JSON (`homework_data.json`):
 | `tkinter` | stdlib | Base GUI framework |
 
 All other imports (`json`, `uuid`, `pathlib`, `datetime`) are part of the Python standard library.
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
