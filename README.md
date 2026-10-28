@@ -26,25 +26,6 @@ Built with **Python** and **CustomTkinter**, with persistent JSON storage — no
 
 ---
 
-## 🖥️ Screenshot
-
-```
-┌─────────────────────┬──────────────────────────────────────────────────┐
-│  👩‍🎓 Students         │  👤  Alice Johnson                              │
-│  ─────────────────  │  Total: 3 | ✔ Done: 2 | ✘ Pending: 1 | 66.7%   │
-│  🔍 Search...       │  ─────────────────────────────────────────────── │
-│                     │  Filter: ● All  ○ Pending  ○ Done  [+ Add]      │
-│  > Alice Johnson    │                                                   │
-│    Bob Smith        │  📋 Algebra exercises p.45         📅 2024-10-28 │
-│    Carol White      │     Exercises 1 through 10          ✔ Done       │
-│                     │     [↩ Mark as Pending]  [🗑 Delete]             │
-│  [+ Add Student]    │                                                   │
-│  [🗑 Remove Student] │  📋 Grammar worksheet              📅 2024-10-27 │
-└─────────────────────┴──────────────────────────────────────────────────┘
-```
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
