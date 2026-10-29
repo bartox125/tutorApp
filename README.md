@@ -1,6 +1,6 @@
 # 📚 Homework Tracker
 
-> A clean desktop application for tutors to monitor and manage students' homework assignments.
+> A clean desktop application for tutors to monitor and manage students homework assignments.
 
 Built with **Python** and **CustomTkinter**, with persistent JSON storage — no database setup required.
 
