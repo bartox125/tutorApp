@@ -1,20 +1,21 @@
 from __future__ import annotations
 import calendar
-from datetime import date
+from datetime import date, timedelta
 from typing import Callable, Optional
 import customtkinter as ctk
+
 _WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 _COLOR_TODAY_BG = '#1f538d'
 _COLOR_SELECTED_BG = '#2ecc71'
 _COLOR_HOVER = '#2b72b8'
-_COLOR_NAV_BTN = 'gray25'
-_COLOR_NAV_HOVER = 'gray35'
-_COLOR_WEEKEND = '#e67e22'
-_COLOR_MUTED = 'gray45'
+_COLOR_NAV_BTN = ('gray80', 'gray25')
+_COLOR_NAV_HOVER = ('gray70', 'gray35')
+_COLOR_WEEKEND = ('#d35400', '#e67e22')
+_COLOR_MUTED = ('gray60', 'gray45')
 
 class DatePickerPopup(ctk.CTkToplevel):
 
-    def __init__(self, parent, initial_date: Optional[date]=None, on_date_selected: Optional[Callable[[date], None]]=None, anchor_widget: Optional[ctk.CTkBaseClass]=None) -> None:
+    def __init__(self, parent, initial_date: Optional[date] = None, on_date_selected: Optional[Callable[[date], None]] = None, anchor_widget: Optional[ctk.CTkBaseClass] = None) -> None:
         super().__init__(parent)
         self._on_select = on_date_selected or (lambda d: None)
         self._today = date.today()
@@ -32,29 +33,27 @@ class DatePickerPopup(ctk.CTkToplevel):
 
     def _build_ui(self) -> None:
         self.grid_columnconfigure(0, weight=1)
-
         header = ctk.CTkFrame(self, fg_color='transparent')
         header.grid(row=0, column=0, padx=10, pady=(10, 4), sticky='ew')
         header.grid_columnconfigure(2, weight=1)
-        
-        ctk.CTkButton(header, text='«', width=26, height=26, corner_radius=5, fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, command=self._prev_year).grid(row=0, column=0, padx=(0, 2))
-        ctk.CTkButton(header, text='‹', width=26, height=26, corner_radius=5, fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, command=self._prev_month).grid(row=0, column=1, padx=(0, 4))
+        ctk.CTkButton(header, text='«', width=26, height=26, corner_radius=5, fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, text_color=('gray10', 'gray90'), command=self._prev_year).grid(row=0, column=0, padx=(0, 2))
+        ctk.CTkButton(header, text='‹', width=26, height=26, corner_radius=5, fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, text_color=('gray10', 'gray90'), command=self._prev_month).grid(row=0, column=1, padx=(0, 4))
         self._lbl_month_year = ctk.CTkLabel(header, text='', font=ctk.CTkFont(size=13, weight='bold'))
         self._lbl_month_year.grid(row=0, column=2, sticky='ew')
-        ctk.CTkButton(header, text='›', width=26, height=26, corner_radius=5, fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, command=self._next_month).grid(row=0, column=3, padx=(4, 0))
-        ctk.CTkButton(header, text='»', width=26, height=26, corner_radius=5, fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, command=self._next_year).grid(row=0, column=4, padx=(2, 0))
+        ctk.CTkButton(header, text='›', width=26, height=26, corner_radius=5, fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, text_color=('gray10', 'gray90'), command=self._next_month).grid(row=0, column=3, padx=(4, 0))
+        ctk.CTkButton(header, text='»', width=26, height=26, corner_radius=5, fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, text_color=('gray10', 'gray90'), command=self._next_year).grid(row=0, column=4, padx=(2, 0))
         weekday_frame = ctk.CTkFrame(self, fg_color='transparent')
         weekday_frame.grid(row=1, column=0, padx=10, pady=(2, 2), sticky='ew')
         for idx, day_name in enumerate(_WEEKDAYS):
-            txt_color = _COLOR_WEEKEND if idx >= 5 else 'gray70'
+            txt_color = _COLOR_WEEKEND if idx >= 5 else ('gray40', 'gray70')
             ctk.CTkLabel(weekday_frame, text=day_name, width=34, font=ctk.CTkFont(size=11, weight='bold'), text_color=txt_color).grid(row=0, column=idx, padx=1)
         self._grid_frame = ctk.CTkFrame(self, fg_color='transparent')
         self._grid_frame.grid(row=2, column=0, padx=10, pady=(0, 6), sticky='ew')
         footer = ctk.CTkFrame(self, fg_color='transparent')
-        footer.grid(row=3, column=0, padx=10, pady=(0, 10), sticky='ew')
+        footer.grid(row=3, column=0, padx=10, pady=(4, 6), sticky='ew')
         footer.grid_columnconfigure((0, 1), weight=1)
-        ctk.CTkButton(footer, text='Today', height=26, font=ctk.CTkFont(size=11), fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, command=self._pick_today).grid(row=0, column=0, padx=(0, 4), sticky='ew')
-        ctk.CTkButton(footer, text='Cancel', height=26, font=ctk.CTkFont(size=11), fg_color='gray40', hover_color='gray30', command=self.destroy).grid(row=0, column=1, padx=(4, 0), sticky='ew')
+        ctk.CTkButton(footer, text='Today', height=26, font=ctk.CTkFont(size=11), fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, text_color=('gray10', 'gray90'), command=self._pick_today).grid(row=0, column=0, padx=(0, 4), sticky='ew')
+        ctk.CTkButton(footer, text='Cancel', height=26, font=ctk.CTkFont(size=11), fg_color=('gray75', 'gray40'), hover_color=('gray65', 'gray30'), text_color=('gray10', 'white'), command=self.destroy).grid(row=0, column=1, padx=(4, 0), sticky='ew')
 
     def _populate_grid(self) -> None:
         for widget in self._grid_frame.winfo_children():
@@ -63,6 +62,9 @@ class DatePickerPopup(ctk.CTkToplevel):
         self._lbl_month_year.configure(text=f'{month_name} {self._view_year}')
         cal = calendar.Calendar(firstweekday=0)
         weeks = cal.monthdatescalendar(self._view_year, self._view_month)
+        while len(weeks) < 6:
+            last_date = weeks[-1][-1]
+            weeks.append([last_date + timedelta(days=i) for i in range(1, 8)])
         for row_idx, week in enumerate(weeks):
             for col_idx, d in enumerate(week):
                 is_current_month = d.month == self._view_month
@@ -81,15 +83,15 @@ class DatePickerPopup(ctk.CTkToplevel):
                     font_weight = 'bold'
                 else:
                     fg_color = 'transparent'
-                    hover_color = 'gray30'
+                    hover_color = ('gray85', 'gray30')
                     if not is_current_month:
                         text_color = _COLOR_MUTED
                     elif is_weekend:
                         text_color = _COLOR_WEEKEND
                     else:
-                        text_color = 'gray90'
+                        text_color = ('gray10', 'gray90')
                     font_weight = 'normal'
-                btn = ctk.CTkButton(self._grid_frame, text=str(d.day), width=34, height=28, corner_radius=5, fg_color=fg_color, hover_color=hover_color, text_color=text_color, font=ctk.CTkFont(size=11, weight=font_weight), command=lambda target_date=d: self._day_clicked(target_date))
+                btn = ctk.CTkButton(self._grid_frame, text=str(d.day), width=34, height=26, corner_radius=5, fg_color=fg_color, hover_color=hover_color, text_color=text_color, font=ctk.CTkFont(size=11, weight=font_weight), command=lambda target_date=d: self._day_clicked(target_date))
                 btn.grid(row=row_idx, column=col_idx, padx=1, pady=1)
 
     def _day_clicked(self, chosen_date: date) -> None:
@@ -125,7 +127,7 @@ class DatePickerPopup(ctk.CTkToplevel):
 
     def _position_window(self, parent, anchor_widget: Optional[ctk.CTkBaseClass]) -> None:
         self.update_idletasks()
-        width = self.winfo_reqwidth()
+        width = max(308, self.winfo_reqwidth())
         height = self.winfo_reqheight()
         if anchor_widget is not None:
             anchor_widget.update_idletasks()
@@ -149,12 +151,12 @@ class DatePickerPopup(ctk.CTkToplevel):
 
 class DateInput(ctk.CTkFrame):
 
-    def __init__(self, parent, initial_date: Optional[date]=None, on_change: Optional[Callable[[date], None]]=None, **kwargs) -> None:
+    def __init__(self, parent, initial_date: Optional[date] = None, on_change: Optional[Callable[[date], None]] = None, **kwargs) -> None:
         super().__init__(parent, fg_color='transparent', **kwargs)
         self._date: date = initial_date or date.today()
         self._on_change = on_change
         self.grid_columnconfigure(0, weight=1)
-        self._container = ctk.CTkFrame(self, corner_radius=6)
+        self._container = ctk.CTkFrame(self, corner_radius=6, fg_color=('gray85', 'gray20'))
         self._container.grid(row=0, column=0, sticky='ew')
         self._container.grid_columnconfigure(0, weight=1)
         self._entry = ctk.CTkEntry(self._container, border_width=0, fg_color='transparent', font=ctk.CTkFont(size=12))
@@ -162,7 +164,7 @@ class DateInput(ctk.CTkFrame):
         self._entry.grid(row=0, column=0, padx=(8, 0), pady=2, sticky='ew')
         self._entry.bind('<FocusOut>', self._on_entry_focus_out)
         self._entry.bind('<Return>', self._on_entry_focus_out)
-        self._cal_btn = ctk.CTkButton(self._container, text='📅', width=32, height=28, corner_radius=5, fg_color='transparent', hover_color='gray30', font=ctk.CTkFont(size=14), command=self.open_picker)
+        self._cal_btn = ctk.CTkButton(self._container, text='📅', width=32, height=28, corner_radius=5, fg_color='transparent', hover_color=('gray75', 'gray30'), text_color=('gray10', 'white'),font=ctk.CTkFont(size=14), command=self.open_picker)
         self._cal_btn.grid(row=0, column=1, padx=(2, 4), pady=2)
 
     def open_picker(self) -> None:

@@ -15,7 +15,9 @@ Built with **Python** and **CustomTkinter**, with persistent JSON storage — no
 | Feature | Details |
 |---|---|
 | **Add / remove students** | Manage your student roster from the sidebar |
-| **Add assignments** | Set a title, optional notes, and an assigned date (HTML-style calendar picker) |
+| **Add assignments** | Set title, notes, assigned date, and due date (HTML-style calendar pickers) |
+| **Due date & Overdue alert** | Track deadlines; overdue pending tasks are highlighted automatically |
+| **Light & Dark modes** | Instant switcher between Dark and Light mode in the sidebar |
 | **Delete assignments** | Remove a task with a confirmation prompt |
 | **Toggle status** | Mark assignments as *Done* or revert to *Pending* |
 | **Student history** | Full assignment log per student with dates and statuses |
@@ -80,10 +82,10 @@ main.py
   │
   └── HomeworkTrackerApp (app.py)
         CustomTkinter root window
-        ├── StudentPanel          — left sidebar
+        ├── StudentPanel          — left sidebar with Theme switch
         │     AddStudentDialog    — modal
         ├── StudentDetailPanel    — main content area
-        │     AddAssignmentDialog — modal
+        │     AddAssignmentDialog — modal with dual calendar inputs
         └── AssignmentRow         — individual task widget
 ```
 
@@ -116,6 +118,7 @@ Data is stored in plain JSON (`homework_data.json`):
           "title": "Algebra exercises p.45",
           "description": "Exercises 1 through 10",
           "date_assigned": "2024-10-28",
+          "due_date": "2024-11-04",
           "status": "Done"
         }
       }

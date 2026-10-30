@@ -25,7 +25,7 @@ def _deserialize_date(s: str) -> date:
 
 class DataManager:
 
-    def __init__(self, db_path: Path=DEFAULT_DB_PATH) -> None:
+    def __init__(self, db_path: Path = DEFAULT_DB_PATH) -> None:
         self._db_path = Path(db_path)
         self._data: dict[str, Any] = {'students': {}}
         self._load()
@@ -75,13 +75,20 @@ class DataManager:
             raise StudentNotFound(f"Student with ID '{student_id}' does not exist.")
         return student
 
-    def add_assignment(self, student_id: str, title: str, description: str='', date_assigned: date | None=None) -> dict:
+    def add_assignment(self, student_id: str, title: str, description: str = '', date_assigned: date | None = None, due_date: date | None = None) -> dict:
         student = self._get_student(student_id)
         title = self._validate_text(title, 'Title')
         if date_assigned is None:
             date_assigned = date.today()
         assignment_id = str(uuid.uuid4())
-        assignment = {'id': assignment_id, 'title': title, 'description': description.strip(), 'date_assigned': _serialize_date(date_assigned), 'status': STATUS_PENDING}
+        assignment = {
+            'id': assignment_id,
+            'title': title,
+            'description': description.strip(),
+            'date_assigned': _serialize_date(date_assigned),
+            'due_date': _serialize_date(due_date) if due_date else None,
+            'status': STATUS_PENDING
+        }
         student['assignments'][assignment_id] = assignment
         self._save()
         return assignment
