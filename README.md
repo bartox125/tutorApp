@@ -16,6 +16,7 @@ Built with **Python** and **CustomTkinter**, with persistent JSON storage — no
 |---|---|
 | **Add / remove students** | Manage your student roster from the sidebar |
 | **Add assignments** | Set title, notes, assigned date, and due date (HTML-style calendar pickers) |
+| **Edit assignments** | Modify title, description, assigned date, and due date at any time |
 | **Due date & Overdue alert** | Track deadlines; overdue pending tasks are highlighted automatically |
 | **Light & Dark modes** | Instant switcher between Dark and Light mode in the sidebar |
 | **Delete assignments** | Remove a task with a confirmation prompt |

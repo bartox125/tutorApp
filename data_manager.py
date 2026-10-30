@@ -20,9 +20,6 @@ class InvalidFieldValue(ValueError):
 def _serialize_date(d: date) -> str:
     return d.isoformat()
 
-def _deserialize_date(s: str) -> date:
-    return date.fromisoformat(s)
-
 class DataManager:
 
     def __init__(self, db_path: Path = DEFAULT_DB_PATH) -> None:
@@ -99,6 +96,23 @@ class DataManager:
             raise AssignmentNotFound(f"Assignment with ID '{assignment_id}' does not exist.")
         del student['assignments'][assignment_id]
         self._save()
+
+    def update_assignment(self, student_id: str, assignment_id: str, title: str, description: str = '', date_assigned: date | None = None, due_date: date | None = None) -> dict:
+        student = self._get_student(student_id)
+        if assignment_id not in student['assignments']:
+            raise AssignmentNotFound(f"Assignment with ID '{assignment_id}' does not exist.")
+        title = self._validate_text(title, 'Title')
+        assignment = student['assignments'][assignment_id]
+        assignment['title'] = title
+        assignment['description'] = description.strip()
+        if date_assigned is not None:
+            assignment['date_assigned'] = _serialize_date(date_assigned) if isinstance(date_assigned, date) else str(date_assigned)
+        if due_date is not None:
+            assignment['due_date'] = _serialize_date(due_date) if isinstance(due_date, date) else str(due_date)
+        else:
+            assignment['due_date'] = None
+        self._save()
+        return assignment
 
     def set_assignment_status(self, student_id: str, assignment_id: str, new_status: str) -> dict:
         if new_status not in (STATUS_DONE, STATUS_PENDING):
