@@ -50,7 +50,7 @@ class DatePickerPopup(ctk.CTkToplevel):
         self._grid_frame = ctk.CTkFrame(self, fg_color='transparent')
         self._grid_frame.grid(row=2, column=0, padx=10, pady=(0, 6), sticky='ew')
         footer = ctk.CTkFrame(self, fg_color='transparent')
-        footer.grid(row=3, column=0, padx=10, pady=(4, 12), sticky='ew')
+        footer.grid(row=3, column=0, padx=10, pady=(4, 6), sticky='ew')
         footer.grid_columnconfigure((0, 1), weight=1)
         ctk.CTkButton(footer, text='Today', height=26, font=ctk.CTkFont(size=11), fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, text_color=('gray10', 'gray90'), command=self._pick_today).grid(row=0, column=0, padx=(0, 4), sticky='ew')
         ctk.CTkButton(footer, text='Cancel', height=26, font=ctk.CTkFont(size=11), fg_color=('gray75', 'gray40'), hover_color=('gray65', 'gray30'), text_color=('gray10', 'white'), command=self.destroy).grid(row=0, column=1, padx=(4, 0), sticky='ew')
@@ -128,7 +128,7 @@ class DatePickerPopup(ctk.CTkToplevel):
     def _position_window(self, parent, anchor_widget: Optional[ctk.CTkBaseClass]) -> None:
         self.update_idletasks()
         width = max(308, self.winfo_reqwidth())
-        height = max(315, self.winfo_reqheight())
+        height = self.winfo_reqheight()
         if anchor_widget is not None:
             anchor_widget.update_idletasks()
             root_x = anchor_widget.winfo_rootx()

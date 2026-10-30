@@ -17,7 +17,7 @@ class AddStudentDialog(ctk.CTkToplevel):
     def __init__(self, parent: ctk.CTk, on_submit):
         super().__init__(parent)
         self.title('Add Student')
-        self.geometry('380x180')
+        self.geometry('380x150')
         self.resizable(False, False)
         self.grab_set()
         self._on_submit = on_submit
@@ -44,7 +44,7 @@ class AddAssignmentDialog(ctk.CTkToplevel):
     def __init__(self, parent: ctk.CTk, student_name: str, on_submit):
         super().__init__(parent)
         self.title(f'New Assignment – {student_name}')
-        self.geometry('480x420')
+        self.geometry('480x350')
         self.resizable(False, False)
         self.grab_set()
         self._on_submit = on_submit
@@ -75,7 +75,7 @@ class AddAssignmentDialog(ctk.CTkToplevel):
         self._due_input = DateInput(col_due, initial_date=date.today())
         self._due_input.grid(row=1, column=0, pady=(4, 0), sticky='ew')
         btn_frame = ctk.CTkFrame(self, fg_color='transparent')
-        btn_frame.grid(row=5, column=0, padx=20, pady=(10, 26), sticky='ew')
+        btn_frame.grid(row=5, column=0, padx=20, pady=(10, 16), sticky='ew')
         btn_frame.grid_columnconfigure((0, 1), weight=1)
         ctk.CTkButton(btn_frame, text='Add Assignment', command=self._confirm).grid(row=0, column=0, padx=(0, 8), sticky='ew')
         ctk.CTkButton(btn_frame, text='Cancel', fg_color=('gray75', 'gray40'), hover_color=('gray65', 'gray30'), text_color=('gray10', 'white'), command=self.destroy).grid(row=0, column=1, padx=(8, 0), sticky='ew')
