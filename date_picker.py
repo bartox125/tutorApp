@@ -3,6 +3,7 @@ import calendar
 from datetime import date, timedelta
 from typing import Callable, Optional
 import customtkinter as ctk
+from data_manager import InvalidFieldValue
 
 _WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 _COLOR_TODAY_BG = '#1f538d'
@@ -168,35 +169,45 @@ class DateInput(ctk.CTkFrame):
         self._cal_btn.grid(row=0, column=1, padx=(2, 4), pady=2)
 
     def open_picker(self) -> None:
-        current = self.get_date()
+        try:
+            current = self.get_date()
+        except InvalidFieldValue:
+            current = self._date
         DatePickerPopup(parent=self.winfo_toplevel(), initial_date=current, on_date_selected=self._set_date_from_picker, anchor_widget=self._container)
 
     def _set_date_from_picker(self, picked_date: date) -> None:
         self._date = picked_date
         self._entry.delete(0, 'end')
         self._entry.insert(0, picked_date.isoformat())
+        self._entry.configure(border_width=0)
         if self._on_change:
             self._on_change(picked_date)
 
     def _on_entry_focus_out(self, event=None) -> None:
-        raw_text = self._entry.get().strip()
         try:
-            parsed = date.fromisoformat(raw_text)
-            self._date = parsed
-            if self._on_change:
-                self._on_change(parsed)
-        except ValueError:
-            self._entry.delete(0, 'end')
-            self._entry.insert(0, self._date.isoformat())
+            parsed = self.get_date()
+        except InvalidFieldValue:
+            self._entry.configure(border_width=2, border_color='#e74c3c')
+            return
+        self._date = parsed
+        self._entry.configure(border_width=0)
+        if self._on_change:
+            self._on_change(parsed)
 
     def get_date(self) -> date:
         raw_text = self._entry.get().strip()
         try:
-            return date.fromisoformat(raw_text)
-        except ValueError:
-            return self._date
+            parsed = date.fromisoformat(raw_text)
+            if parsed.isoformat() != raw_text:
+                raise ValueError('Expected YYYY-MM-DD')
+        except ValueError as exc:
+            raise InvalidFieldValue(
+                f"Invalid date '{raw_text}'. Enter a valid date in YYYY-MM-DD format."
+            ) from exc
+        return parsed
 
     def set_date(self, new_date: date) -> None:
         self._date = new_date
         self._entry.delete(0, 'end')
         self._entry.insert(0, new_date.isoformat())
+        self._entry.configure(border_width=0)

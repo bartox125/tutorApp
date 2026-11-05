@@ -5,8 +5,7 @@ from datetime import date
 from typing import Optional
 import customtkinter as ctk
 from date_picker import DateInput
-from data_manager import DataManager, InvalidFieldValue, StudentNotFound, AssignmentNotFound, STATUS_DONE, STATUS_PENDING
-
+from data_manager import DatabaseError, DataManager, InvalidFieldValue, StudentNotFound, AssignmentNotFound, STATUS_DONE, STATUS_PENDING
 ctk.set_appearance_mode('dark')
 ctk.set_default_color_theme('blue')
 COLOR_DONE = '#2ecc71'
@@ -36,8 +35,8 @@ class AddStudentDialog(ctk.CTkToplevel):
         ctk.CTkButton(btn_frame, text='Cancel', fg_color=('gray75', 'gray40'), hover_color=('gray65', 'gray30'), text_color=('gray10', 'white'), command=self.destroy).grid(row=0, column=1, padx=(8, 0), sticky='ew')
 
     def _confirm(self) -> None:
-        self._on_submit(self._name_entry.get())
-        self.destroy()
+        if self._on_submit(self._name_entry.get()):
+            self.destroy()
 
 class AddAssignmentDialog(ctk.CTkToplevel):
 
@@ -83,10 +82,78 @@ class AddAssignmentDialog(ctk.CTkToplevel):
     def _confirm(self) -> None:
         title = self._title_entry.get()
         description = self._desc_box.get('1.0', 'end-1c')
-        assigned_date = self._assigned_input.get_date()
-        due_date = self._due_input.get_date()
-        self._on_submit(title, description, assigned_date, due_date)
-        self.destroy()
+        try:
+            assigned_date = self._assigned_input.get_date()
+            due_date = self._due_input.get_date()
+        except InvalidFieldValue as exc:
+            messagebox.showerror('Invalid date', str(exc), parent=self)
+            return
+        if self._on_submit(title, description, assigned_date, due_date):
+            self.destroy()
+
+class EditAssignmentDialog(ctk.CTkToplevel):
+
+    def __init__(self, parent: ctk.CTk, assignment: dict, on_submit):
+        super().__init__(parent)
+        self.title('Edit Assignment')
+        self.geometry('480x370')
+        self.resizable(False, False)
+        self.grab_set()
+        self._assignment = assignment
+        self._on_submit = on_submit
+        self._build_ui()
+
+    def _build_ui(self) -> None:
+        self.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(self, text='Title (required):', anchor='w').grid(row=0, column=0, padx=20, pady=(20, 4), sticky='ew')
+        self._title_entry = ctk.CTkEntry(self, placeholder_text='e.g. Algebra exercises p. 45')
+        self._title_entry.insert(0, self._assignment.get('title', ''))
+        self._title_entry.grid(row=1, column=0, padx=20, pady=(0, 12), sticky='ew')
+        self._title_entry.focus()
+        ctk.CTkLabel(self, text='Description / notes (optional):', anchor='w').grid(row=2, column=0, padx=20, pady=(0, 4), sticky='ew')
+        self._desc_box = ctk.CTkTextbox(self, height=75)
+        self._desc_box.insert('1.0', self._assignment.get('description', ''))
+        self._desc_box.grid(row=3, column=0, padx=20, pady=(0, 12), sticky='ew')
+        dates_frame = ctk.CTkFrame(self, fg_color='transparent')
+        dates_frame.grid(row=4, column=0, padx=20, pady=(0, 16), sticky='ew')
+        dates_frame.grid_columnconfigure((0, 1), weight=1)
+        col_assigned = ctk.CTkFrame(dates_frame, fg_color='transparent')
+        col_assigned.grid(row=0, column=0, padx=(0, 6), sticky='ew')
+        col_assigned.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(col_assigned, text='Date assigned:', anchor='w').grid(row=0, column=0, sticky='w')
+        try:
+            initial_assigned = date.fromisoformat(self._assignment['date_assigned'])
+        except (KeyError, ValueError, TypeError):
+            initial_assigned = date.today()
+        self._assigned_input = DateInput(col_assigned, initial_date=initial_assigned)
+        self._assigned_input.grid(row=1, column=0, pady=(4, 0), sticky='ew')
+        col_due = ctk.CTkFrame(dates_frame, fg_color='transparent')
+        col_due.grid(row=0, column=1, padx=(6, 0), sticky='ew')
+        col_due.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(col_due, text='Due date:', anchor='w').grid(row=0, column=0, sticky='w')
+        try:
+            initial_due = date.fromisoformat(self._assignment['due_date']) if self._assignment.get('due_date') else date.today()
+        except (ValueError, TypeError):
+            initial_due = date.today()
+        self._due_input = DateInput(col_due, initial_date=initial_due)
+        self._due_input.grid(row=1, column=0, pady=(4, 0), sticky='ew')
+        btn_frame = ctk.CTkFrame(self, fg_color='transparent')
+        btn_frame.grid(row=5, column=0, padx=20, pady=(10, 16), sticky='ew')
+        btn_frame.grid_columnconfigure((0, 1), weight=1)
+        ctk.CTkButton(btn_frame, text='Save Changes', command=self._confirm).grid(row=0, column=0, padx=(0, 8), sticky='ew')
+        ctk.CTkButton(btn_frame, text='Cancel', fg_color=('gray75', 'gray40'), hover_color=('gray65', 'gray30'), text_color=('gray10', 'white'), command=self.destroy).grid(row=0, column=1, padx=(8, 0), sticky='ew')
+
+    def _confirm(self) -> None:
+        title = self._title_entry.get()
+        description = self._desc_box.get('1.0', 'end-1c')
+        try:
+            assigned_date = self._assigned_input.get_date()
+            due_date = self._due_input.get_date()
+        except InvalidFieldValue as exc:
+            messagebox.showerror('Invalid date', str(exc), parent=self)
+            return
+        if self._on_submit(title, description, assigned_date, due_date):
+            self.destroy()
 
 class AssignmentRow(ctk.CTkFrame):
 
@@ -122,6 +189,7 @@ class AssignmentRow(ctk.CTkFrame):
             ctk.CTkLabel(self, text=f'   {description}', anchor='w', text_color=('gray40', 'gray60'), font=ctk.CTkFont(size=11), wraplength=500).grid(row=1, column=0, columnspan=2, padx=12, pady=(0, 4), sticky='ew')
         action_frame = ctk.CTkFrame(self, fg_color='transparent')
         action_frame.grid(row=2, column=0, columnspan=2, padx=12, pady=(4, 10), sticky='e')
+        ctk.CTkButton(action_frame, text='✏ Edit', fg_color=('gray75', 'gray35'), hover_color=('gray65', 'gray25'), text_color=('gray10', 'white'), height=28, font=ctk.CTkFont(size=11), command=self._open_edit).pack(side='left', padx=(0, 6))
         if status == STATUS_PENDING:
             ctk.CTkButton(action_frame, text='✔ Mark as Done', fg_color='#27ae60', hover_color='#1e8449', text_color='white', height=28, font=ctk.CTkFont(size=11), command=self._mark_done).pack(side='left', padx=(0, 6))
         else:
@@ -132,14 +200,14 @@ class AssignmentRow(ctk.CTkFrame):
         try:
             self._dm.set_assignment_status(self._student_id, self._assignment['id'], STATUS_DONE)
             self._on_refresh()
-        except (StudentNotFound, AssignmentNotFound, InvalidFieldValue) as e:
+        except (StudentNotFound, AssignmentNotFound, InvalidFieldValue, DatabaseError) as e:
             messagebox.showerror('Error', str(e))
 
     def _mark_pending(self) -> None:
         try:
             self._dm.set_assignment_status(self._student_id, self._assignment['id'], STATUS_PENDING)
             self._on_refresh()
-        except (StudentNotFound, AssignmentNotFound, InvalidFieldValue) as e:
+        except (StudentNotFound, AssignmentNotFound, InvalidFieldValue, DatabaseError) as e:
             messagebox.showerror('Error', str(e))
 
     def _delete(self) -> None:
@@ -148,8 +216,20 @@ class AssignmentRow(ctk.CTkFrame):
             try:
                 self._dm.remove_assignment(self._student_id, self._assignment['id'])
                 self._on_refresh()
-            except (StudentNotFound, AssignmentNotFound) as e:
+            except (StudentNotFound, AssignmentNotFound, DatabaseError) as e:
                 messagebox.showerror('Error', str(e))
+
+    def _open_edit(self) -> None:
+        EditAssignmentDialog(self.winfo_toplevel(), self._assignment, self._save_edit)
+
+    def _save_edit(self, title: str, description: str, assigned_date: date, due_date: date) -> bool:
+        try:
+            self._dm.update_assignment(self._student_id, self._assignment['id'], title, description, assigned_date, due_date)
+            self._on_refresh()
+            return True
+        except (StudentNotFound, AssignmentNotFound, InvalidFieldValue, DatabaseError) as e:
+            messagebox.showerror('Error', str(e))
+            return False
 
 class StudentPanel(ctk.CTkFrame):
 
@@ -209,14 +289,16 @@ class StudentPanel(ctk.CTkFrame):
     def _open_add_dialog(self) -> None:
         AddStudentDialog(self, self._handle_add)
 
-    def _handle_add(self, full_name: str) -> None:
+    def _handle_add(self, full_name: str) -> bool:
         try:
             student = self._dm.add_student(full_name)
             self._selected_id = student['id']
             self.refresh()
             self._on_select(student['id'])
-        except InvalidFieldValue as e:
+            return True
+        except (InvalidFieldValue, DatabaseError) as e:
             messagebox.showerror('Error', str(e))
+            return False
 
     def _remove_student(self) -> None:
         if not self._selected_id:
@@ -230,7 +312,7 @@ class StudentPanel(ctk.CTkFrame):
                 self._selected_id = None
                 self.refresh()
                 self._on_select(None)
-            except StudentNotFound as e:
+            except (StudentNotFound, DatabaseError) as e:
                 messagebox.showerror('Error', str(e))
 
     @property
@@ -327,12 +409,14 @@ class StudentDetailPanel(ctk.CTkFrame):
         if student:
             AddAssignmentDialog(self, student['full_name'], self._handle_add_assignment)
 
-    def _handle_add_assignment(self, title: str, description: str, assigned_date: date, due_date: date) -> None:
+    def _handle_add_assignment(self, title: str, description: str, assigned_date: date, due_date: date) -> bool:
         try:
             self._dm.add_assignment(self._student_id, title, description, assigned_date, due_date)
             self._on_assignment_changed()
-        except (StudentNotFound, InvalidFieldValue) as e:
+            return True
+        except (StudentNotFound, InvalidFieldValue, DatabaseError) as e:
             messagebox.showerror('Error', str(e))
+            return False
 
     def refresh(self) -> None:
         self.load_student(self._student_id)

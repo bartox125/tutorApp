@@ -95,9 +95,9 @@ main.py
 
 - **Empty student name** → error dialog, no data written
 - **Empty assignment title** → error dialog, no data written
-- **Invalid date format** → error dialog with format hint
+- **Invalid date format**: the dialog stays open and shows a YYYY-MM-DD format hint; entered values are preserved.
 - **Deleting a student or assignment** always requires confirmation
-- **Corrupted JSON file** → app starts with an empty database and logs a warning to the console
+- **Unreadable or invalid database**: startup shows an error and preserves the original file. Restore or repair the file before restarting.
 
 ---
 
@@ -137,3 +137,7 @@ Data is stored in plain JSON (`homework_data.json`):
 | `tkinter` | stdlib | Base GUI framework |
 
 All other imports (`json`, `uuid`, `pathlib`, `datetime`) are part of the Python standard library.
+
+Saves use an atomic file replacement. Failed saves show an error and leave the previous database and in-memory records unchanged.
+
+Run the regression checks with `python -B -m unittest discover -s tests -v`.
