@@ -8,6 +8,7 @@ import uuid
 from datetime import date
 from pathlib import Path
 from typing import Any
+from i18n import t
 DEFAULT_DB_PATH = Path('homework_data.json')
 STATUS_PENDING = 'Pending'
 STATUS_DONE = 'Done'
@@ -44,17 +45,11 @@ class DataManager:
         except FileNotFoundError:
             return
         except (OSError, ValueError) as exc:
-            raise DatabaseError(
-                f"Could not load database '{self._db_path}': {exc}. "
-                'The file has been left unchanged. Restore or repair it before restarting.'
-            ) from exc
+            raise DatabaseError(t('err_load', path=self._db_path, error=exc)) from exc
         try:
             self._validate_data(data)
         except (ValueError, TypeError) as exc:
-            raise DatabaseError(
-                f"Invalid database '{self._db_path}': {exc}. "
-                'The file has been left unchanged. Restore or repair it before restarting.'
-            ) from exc
+            raise DatabaseError(t('err_invalid_db', path=self._db_path, error=exc)) from exc
         self._data = data
 
     @staticmethod
@@ -108,7 +103,7 @@ class DataManager:
                 os.fsync(f.fileno())
             os.replace(temp_path, self._db_path)
         except (OSError, ValueError, TypeError) as exc:
-            raise DatabaseError(f"Could not save database '{self._db_path}': {exc}") from exc
+            raise DatabaseError(t('err_save', path=self._db_path, error=exc)) from exc
         finally:
             if temp_path is not None:
                 try:
@@ -131,11 +126,11 @@ class DataManager:
     def _validate_text(value: str, field_name: str) -> str:
         stripped = value.strip()
         if not stripped:
-            raise InvalidFieldValue(f"Field '{field_name}' must not be empty.")
+            raise InvalidFieldValue(t('err_empty_field', field=field_name))
         return stripped
 
     def add_student(self, full_name: str) -> dict:
-        full_name = self._validate_text(full_name, 'Full name')
+        full_name = self._validate_text(full_name, t('field_full_name'))
         student_id = str(uuid.uuid4())
         student = {'id': student_id, 'full_name': full_name, 'date_added': _serialize_date(date.today()), 'assignments': {}}
         with self._transaction():
@@ -153,12 +148,12 @@ class DataManager:
     def _get_student(self, student_id: str) -> dict:
         student = self._data['students'].get(student_id)
         if student is None:
-            raise StudentNotFound(f"Student with ID '{student_id}' does not exist.")
+            raise StudentNotFound(t('err_student_missing', id=student_id))
         return student
 
     def add_assignment(self, student_id: str, title: str, description: str = '', date_assigned: date | None = None, due_date: date | None = None) -> dict:
         student = self._get_student(student_id)
-        title = self._validate_text(title, 'Title')
+        title = self._validate_text(title, t('field_title'))
         if date_assigned is None:
             date_assigned = date.today()
         assignment_id = str(uuid.uuid4())
@@ -177,17 +172,17 @@ class DataManager:
     def remove_assignment(self, student_id: str, assignment_id: str) -> None:
         student = self._get_student(student_id)
         if assignment_id not in student['assignments']:
-            raise AssignmentNotFound(f"Assignment with ID '{assignment_id}' does not exist.")
+            raise AssignmentNotFound(t('err_assignment_missing', id=assignment_id))
         with self._transaction():
             del self._get_student(student_id)['assignments'][assignment_id]
 
     def set_assignment_status(self, student_id: str, assignment_id: str, new_status: str) -> dict:
         if new_status not in (STATUS_DONE, STATUS_PENDING):
-            raise InvalidFieldValue(f"Invalid status: '{new_status}'. Allowed values: '{STATUS_DONE}', '{STATUS_PENDING}'.")
+            raise InvalidFieldValue(t('err_invalid_status', status=new_status, done=STATUS_DONE, pending=STATUS_PENDING))
         student = self._get_student(student_id)
         assignment = student['assignments'].get(assignment_id)
         if assignment is None:
-            raise AssignmentNotFound(f"Assignment with ID '{assignment_id}' does not exist.")
+            raise AssignmentNotFound(t('err_assignment_missing', id=assignment_id))
         with self._transaction():
             assignment = self._get_student(student_id)['assignments'][assignment_id]
             assignment['status'] = new_status
@@ -198,10 +193,10 @@ class DataManager:
         return sorted(student['assignments'].values(), key=lambda a: a['date_assigned'], reverse=True)
 
     def update_assignment(self, student_id: str, assignment_id: str, title: str, description: str, date_assigned: date, due_date: date | None) -> dict:
-        title = self._validate_text(title, 'Title')
+        title = self._validate_text(title, t('field_title'))
         student = self._get_student(student_id)
         if assignment_id not in student['assignments']:
-            raise AssignmentNotFound(f"Assignment with ID '{assignment_id}' does not exist.")
+            raise AssignmentNotFound(t('err_assignment_missing', id=assignment_id))
         with self._transaction():
             assignment = self._get_student(student_id)['assignments'][assignment_id]
             assignment['title'] = title

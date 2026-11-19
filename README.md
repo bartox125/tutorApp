@@ -18,6 +18,7 @@ Built with **Python** and **CustomTkinter**, with persistent JSON storage — no
 | **Add assignments** | Set title, notes, assigned date, and due date (HTML-style calendar pickers) |
 | **Due date & Overdue alert** | Track deadlines; overdue pending tasks are highlighted automatically |
 | **Light & Dark modes** | Instant switcher between Dark and Light mode in the sidebar |
+| **Polish & English UI** | Language switcher in the sidebar (Polish by default), choice saved to `settings.json` |
 | **Delete assignments** | Remove a task with a confirmation prompt |
 | **Toggle status** | Mark assignments as *Done* or revert to *Pending* |
 | **Student history** | Full assignment log per student with dates and statuses |
@@ -64,6 +65,7 @@ homework-tracker/
 ├── data_manager.py      # Business logic & JSON persistence (no UI code)
 ├── app.py               # CustomTkinter GUI (no business logic)
 ├── date_picker.py       # CustomTkinter date input & calendar popup widget
+├── i18n.py              # Translations (pl/en) and language setting
 ├── homework_data.json   # Auto-generated database (git-ignored)
 ├── .gitignore
 └── README.md

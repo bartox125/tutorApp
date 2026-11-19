@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from data_manager import DatabaseError, DataManager
+from i18n import t
 from app import HomeworkTrackerApp
 
 
@@ -11,7 +12,7 @@ def main() -> None:
         root = tk.Tk()
         root.withdraw()
         try:
-            messagebox.showerror('Database error', str(exc), parent=root)
+            messagebox.showerror(t('db_error_title'), str(exc), parent=root)
         finally:
             root.destroy()
         return
