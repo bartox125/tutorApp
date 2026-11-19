@@ -4,8 +4,8 @@ from datetime import date, timedelta
 from typing import Callable, Optional
 import customtkinter as ctk
 from data_manager import InvalidFieldValue
+from i18n import month_name, t, weekdays
 
-_WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 _COLOR_TODAY_BG = '#1f538d'
 _COLOR_SELECTED_BG = '#2ecc71'
 _COLOR_HOVER = '#2b72b8'
@@ -23,7 +23,7 @@ class DatePickerPopup(ctk.CTkToplevel):
         self._selected: date = initial_date or self._today
         self._view_year: int = self._selected.year
         self._view_month: int = self._selected.month
-        self.title('Select Date')
+        self.title(t('select_date'))
         self.resizable(False, False)
         self.transient(parent)
         self.grab_set()
@@ -45,7 +45,7 @@ class DatePickerPopup(ctk.CTkToplevel):
         ctk.CTkButton(header, text='»', width=26, height=26, corner_radius=5, fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, text_color=('gray10', 'gray90'), command=self._next_year).grid(row=0, column=4, padx=(2, 0))
         weekday_frame = ctk.CTkFrame(self, fg_color='transparent')
         weekday_frame.grid(row=1, column=0, padx=10, pady=(2, 2), sticky='ew')
-        for idx, day_name in enumerate(_WEEKDAYS):
+        for idx, day_name in enumerate(weekdays()):
             txt_color = _COLOR_WEEKEND if idx >= 5 else ('gray40', 'gray70')
             ctk.CTkLabel(weekday_frame, text=day_name, width=34, font=ctk.CTkFont(size=11, weight='bold'), text_color=txt_color).grid(row=0, column=idx, padx=1)
         self._grid_frame = ctk.CTkFrame(self, fg_color='transparent')
@@ -53,14 +53,13 @@ class DatePickerPopup(ctk.CTkToplevel):
         footer = ctk.CTkFrame(self, fg_color='transparent')
         footer.grid(row=3, column=0, padx=10, pady=(4, 6), sticky='ew')
         footer.grid_columnconfigure((0, 1), weight=1)
-        ctk.CTkButton(footer, text='Today', height=26, font=ctk.CTkFont(size=11), fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, text_color=('gray10', 'gray90'), command=self._pick_today).grid(row=0, column=0, padx=(0, 4), sticky='ew')
-        ctk.CTkButton(footer, text='Cancel', height=26, font=ctk.CTkFont(size=11), fg_color=('gray75', 'gray40'), hover_color=('gray65', 'gray30'), text_color=('gray10', 'white'), command=self.destroy).grid(row=0, column=1, padx=(4, 0), sticky='ew')
+        ctk.CTkButton(footer, text=t('today'), height=26, font=ctk.CTkFont(size=11), fg_color=_COLOR_NAV_BTN, hover_color=_COLOR_NAV_HOVER, text_color=('gray10', 'gray90'), command=self._pick_today).grid(row=0, column=0, padx=(0, 4), sticky='ew')
+        ctk.CTkButton(footer, text=t('cancel'), height=26, font=ctk.CTkFont(size=11), fg_color=('gray75', 'gray40'), hover_color=('gray65', 'gray30'), text_color=('gray10', 'white'), command=self.destroy).grid(row=0, column=1, padx=(4, 0), sticky='ew')
 
     def _populate_grid(self) -> None:
         for widget in self._grid_frame.winfo_children():
             widget.destroy()
-        month_name = calendar.month_name[self._view_month]
-        self._lbl_month_year.configure(text=f'{month_name} {self._view_year}')
+        self._lbl_month_year.configure(text=f'{month_name(self._view_month)} {self._view_year}')
         cal = calendar.Calendar(firstweekday=0)
         weeks = cal.monthdatescalendar(self._view_year, self._view_month)
         while len(weeks) < 6:
@@ -201,9 +200,7 @@ class DateInput(ctk.CTkFrame):
             if parsed.isoformat() != raw_text:
                 raise ValueError('Expected YYYY-MM-DD')
         except ValueError as exc:
-            raise InvalidFieldValue(
-                f"Invalid date '{raw_text}'. Enter a valid date in YYYY-MM-DD format."
-            ) from exc
+            raise InvalidFieldValue(t('err_invalid_date', value=raw_text)) from exc
         return parsed
 
     def set_date(self, new_date: date) -> None:
